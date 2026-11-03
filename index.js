@@ -107,8 +107,6 @@ async function run() {
 
     // ============ Book Routes ============
     // 1. GET /books — get all books (public)
-    //    Supports ?sort=createdAt&order=desc&limit=6 for "New Arrivals"
-    //    Supports ?email= or ?userEmail= to filter books added by a specific user
     app.get("/books", async (req, res) => {
       try {
         const { sort, order, limit, email, userEmail } = req.query;
@@ -196,6 +194,57 @@ async function run() {
         res.json(result);
       } catch (err) {
         res.status(500).json({ message: "Failed to delete book", error: err.message });
+      }
+    });
+
+    // ============ Borrow Routes ============
+    // 6. POST /borrows — borrow a book (protected)
+    app.post("/borrows", verifyToken, async (req, res) => {
+      try {
+        const { bookId, bookTitle, bookImage, userEmail } = req.body;
+
+        // Check if copies > 0
+        const book = await booksCollection.findOne({ _id: new ObjectId(bookId) });
+        if (!book) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        if (book.totalCopies <= 0) {
+          return res.status(400).json({ message: "No copies available to borrow" });
+        }
+
+        // Check if user already borrowed this book (no double borrow)
+        const existingBorrow = await borrowsCollection.findOne({
+          bookId,
+          userEmail,
+        });
+        if (existingBorrow) {
+          return res.status(400).json({ message: "You have already borrowed this book" });
+        }
+
+        // Decrease totalCopies by 1
+        await booksCollection.updateOne(
+          { _id: new ObjectId(bookId) },
+          { $inc: { totalCopies: -1 } }
+        );
+
+        // Save borrow record
+        const borrowDate = new Date();
+        const returnDate = new Date();
+        returnDate.setDate(returnDate.getDate() + 14);
+
+        const borrowRecord = {
+          bookId,
+          bookTitle,
+          bookImage,
+          userEmail,
+          borrowDate,
+          returnDate,
+        };
+
+        const result = await borrowsCollection.insertOne(borrowRecord);
+        res.status(201).json(result);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to borrow book", error: err.message });
       }
     });
 
