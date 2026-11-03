@@ -107,6 +107,8 @@ async function run() {
 
     // ============ Book Routes ============
     // 1. GET /books — get all books (public)
+    //    Supports ?sort=createdAt&order=desc&limit=6 for "New Arrivals"
+    //    Supports ?email= or ?userEmail= to filter books added by a specific user
     app.get("/books", async (req, res) => {
       try {
         const { sort, order, limit, email, userEmail } = req.query;
@@ -248,10 +250,49 @@ async function run() {
       }
     });
 
+    // 7. GET /borrows — get borrows of logged-in user (protected)
+    app.get("/borrows", verifyToken, async (req, res) => {
+      try {
+        const userEmail = req.query.userEmail || req.query.email || req.user?.email;
+        const filter = userEmail ? { userEmail } : {};
+        const borrows = await borrowsCollection.find(filter).toArray();
+        res.json(borrows);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to fetch borrows", error: err.message });
+      }
+    });
+
+    // 8. DELETE /borrows/:id — return a book (protected)
+    app.delete("/borrows/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+
+        // Find the borrow record
+        const borrow = await borrowsCollection.findOne({ _id: new ObjectId(id) });
+        if (!borrow) {
+          return res.status(404).json({ message: "Borrow record not found" });
+        }
+
+        // Increase the book's totalCopies by 1
+        await booksCollection.updateOne(
+          { _id: new ObjectId(borrow.bookId) },
+          { $inc: { totalCopies: 1 } }
+        );
+
+        // Delete the borrow record
+        const result = await borrowsCollection.deleteOne({ _id: new ObjectId(id) });
+        res.json(result);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to return book", error: err.message });
+      }
+    });
+
+    // ============ Root Route ============
     app.get("/", (req, res) => {
       res.json({ message: "BookNook server is running!" });
     });
 
+    // ============ Start Server ============
     app.listen(port, () => {
       console.log(`BookNook server is running on port ${port}`);
     });
