@@ -72,7 +72,6 @@ async function run() {
     const borrowsCollection = db.collection("borrows");
 
     // ============ JWT Routes ============
-    // Generate JWT token
     app.post("/jwt", (req, res) => {
       try {
         const { email } = req.body;
@@ -92,7 +91,6 @@ async function run() {
       }
     });
 
-    // Logout — clear token cookie
     app.post("/jwt/logout", (req, res) => {
       try {
         res
@@ -104,6 +102,53 @@ async function run() {
           .json({ success: true, message: "Logged out successfully" });
       } catch (err) {
         res.status(500).json({ message: "Logout failed", error: err.message });
+      }
+    });
+
+    // ============ Book Routes ============
+    // 1. GET /books — get all books (public)
+    //    Supports ?sort=createdAt&order=desc&limit=6 for "New Arrivals"
+    //    Supports ?email= or ?userEmail= to filter books added by a specific user
+    app.get("/books", async (req, res) => {
+      try {
+        const { sort, order, limit, email, userEmail } = req.query;
+
+        const filter = {};
+        if (email) {
+          filter.userEmail = email;
+        } else if (userEmail) {
+          filter.userEmail = userEmail;
+        }
+
+        let query = booksCollection.find(filter);
+
+        if (sort) {
+          const sortOrder = order === "desc" ? -1 : 1;
+          query = query.sort({ [sort]: sortOrder });
+        }
+
+        if (limit) {
+          query = query.limit(parseInt(limit));
+        }
+
+        const books = await query.toArray();
+        res.json(books);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to fetch books", error: err.message });
+      }
+    });
+
+    // 2. GET /books/:id — get one book by ID
+    app.get("/books/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const book = await booksCollection.findOne({ _id: new ObjectId(id) });
+        if (!book) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        res.json(book);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to fetch book", error: err.message });
       }
     });
 
