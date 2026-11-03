@@ -152,6 +152,53 @@ async function run() {
       }
     });
 
+    // 3. POST /books — add a new book (protected)
+    app.post("/books", verifyToken, async (req, res) => {
+      try {
+        const bookData = {
+          ...req.body,
+          totalCopies: parseInt(req.body.totalCopies) || 1,
+          createdAt: new Date(),
+        };
+        const result = await booksCollection.insertOne(bookData);
+        res.status(201).json(result);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to add book", error: err.message });
+      }
+    });
+
+    // 4. PATCH /books/:id — update a book (protected)
+    app.patch("/books/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateData = req.body;
+        const result = await booksCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        res.json(result);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to update book", error: err.message });
+      }
+    });
+
+    // 5. DELETE /books/:id — delete a book (protected)
+    app.delete("/books/:id", verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await booksCollection.deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        res.json(result);
+      } catch (err) {
+        res.status(500).json({ message: "Failed to delete book", error: err.message });
+      }
+    });
+
     app.get("/", (req, res) => {
       res.json({ message: "BookNook server is running!" });
     });
