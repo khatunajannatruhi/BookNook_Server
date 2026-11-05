@@ -189,7 +189,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============ JWT Routes ============
-app.post("/jwt", (req, res) => {
+app.post(["/jwt", "/api/jwt"], (req, res) => {
   try {
     const { email } = req.body;
     const secret = process.env.JWT_SECRET || "booknook_jwt_secret_key_2024_very_secure";
@@ -208,7 +208,7 @@ app.post("/jwt", (req, res) => {
   }
 });
 
-app.post("/jwt/logout", (req, res) => {
+app.post(["/jwt/logout", "/api/jwt/logout"], (req, res) => {
   try {
     res
       .clearCookie("token", {
@@ -224,7 +224,7 @@ app.post("/jwt/logout", (req, res) => {
 
 // ============ Book Routes ============
 // 1. GET /books — get all books (public)
-app.get("/books", async (req, res) => {
+app.get(["/books", "/api/books"], async (req, res) => {
   try {
     const { sort, order, limit, email, userEmail } = req.query;
 
@@ -268,7 +268,7 @@ app.get("/books", async (req, res) => {
 });
 
 // 2. GET /books/:id — get one book by ID
-app.get("/books/:id", async (req, res) => {
+app.get(["/books/:id", "/api/books/:id"], async (req, res) => {
   try {
     const id = req.params.id;
     if (isConnected && booksCollection) {
@@ -286,7 +286,7 @@ app.get("/books/:id", async (req, res) => {
 });
 
 // 3. POST /books — add a new book (protected)
-app.post("/books", verifyToken, async (req, res) => {
+app.post(["/books", "/api/books"], verifyToken, async (req, res) => {
   try {
     const bookData = {
       ...req.body,
@@ -311,7 +311,7 @@ app.post("/books", verifyToken, async (req, res) => {
 });
 
 // 4. PATCH /books/:id — update a book (protected)
-app.patch("/books/:id", verifyToken, async (req, res) => {
+app.patch(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
     const updateData = req.body;
@@ -337,7 +337,7 @@ app.patch("/books/:id", verifyToken, async (req, res) => {
 });
 
 // 5. DELETE /books/:id — delete a book (protected)
-app.delete("/books/:id", verifyToken, async (req, res) => {
+app.delete(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -360,7 +360,7 @@ app.delete("/books/:id", verifyToken, async (req, res) => {
 
 // ============ Borrow Routes ============
 // 6. POST /borrows — borrow a book (protected)
-app.post("/borrows", verifyToken, async (req, res) => {
+app.post(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
   try {
     const { bookId, bookTitle, bookImage, userEmail } = req.body;
 
@@ -413,7 +413,7 @@ app.post("/borrows", verifyToken, async (req, res) => {
 });
 
 // 7. GET /borrows — get borrows of logged-in user (protected)
-app.get("/borrows", verifyToken, async (req, res) => {
+app.get(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
   try {
     const userEmail = req.query.userEmail || req.query.email || req.user?.email;
 
@@ -431,7 +431,7 @@ app.get("/borrows", verifyToken, async (req, res) => {
 });
 
 // 8. DELETE /borrows/:id — return a book (protected)
-app.delete("/borrows/:id", verifyToken, async (req, res) => {
+app.delete(["/borrows/:id", "/api/borrows/:id"], verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -459,11 +459,17 @@ app.delete("/borrows/:id", verifyToken, async (req, res) => {
 });
 
 // ============ Root Route ============
-app.get("/", (req, res) => {
+app.get(["/", "/api"], (req, res) => {
   res.json({
     message: "BookNook server is running!",
     status: "healthy",
     storage: isConnected ? "MongoDB Atlas" : "Resilient Active Datastore",
+    endpoints: {
+      books: "/books (or /api/books)",
+      bookById: "/books/:id (or /api/books/:id)",
+      borrows: "/borrows (or /api/borrows)",
+      jwt: "/jwt (or /api/jwt)",
+    },
   });
 });
 
