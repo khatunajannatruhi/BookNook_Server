@@ -5,8 +5,8 @@ The backend server powering **BookNook**, a digital library platform. Built with
 ---
 
 ## 🌐 API Base URL
-- **Production URL**: [https://booknook-server.onrender.com](https://booknook-server.onrender.com)
-- **Local Dev URL**: `http://localhost:5000`
+- **Production URL**: [[https://booknook-server.onrender.com](https://booknook-server.onrender.com)](https://book-nook-server-gamma.vercel.app/)
+
 
 ---
 
@@ -45,28 +45,6 @@ The backend server powering **BookNook**, a digital library platform. Built with
 - **CORS**: `cors`
 
 ---
-
-## 🚀 Local Setup & Installation
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/khatunajannatruhi/BookNook_Server.git
-cd BookNook_Server
-```
-
-### 2. Install dependencies
-```bash
-npm install
-```
-
-### 3. Environment Variables
-Create a `.env` file in the root directory:
-```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=booknook_jwt_secret_key_2024_very_secure
-CLIENT_URL=http://localhost:3000
-```
 
 ### 4. Start the server
 ```bash
