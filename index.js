@@ -32,6 +32,16 @@ app.options("*", cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// Normalize /api/* paths to /* so all 8 endpoints respond whether requested with or without /api
+app.use((req, res, next) => {
+  if (req.url.startsWith("/api/")) {
+    req.url = req.url.replace(/^\/api/, "");
+  } else if (req.url === "/api") {
+    req.url = "/";
+  }
+  next();
+});
+
 // ============ Verify JWT Token Middleware ============
 const verifyToken = (req, res, next) => {
   const token =
