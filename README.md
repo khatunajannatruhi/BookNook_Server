@@ -5,8 +5,7 @@ The backend server powering **BookNook**, a digital library platform. Built with
 ---
 
 ## 🌐 API Base URL
-- **Production URL**: [[https://booknook-server.onrender.com](https://booknook-server.onrender.com)](https://book-nook-server-gamma.vercel.app/)
-
+- **Production URL**: https://book-nook-server-gamma.vercel.app/
 
 ---
 
@@ -45,10 +44,3 @@ The backend server powering **BookNook**, a digital library platform. Built with
 - **CORS**: `cors`
 
 ---
-
-### 4. Start the server
-```bash
-npm start
-```
-Server runs on port 5000 by default.
-
