@@ -28,6 +28,7 @@ app.use(
     credentials: true,
   })
 );
+app.options("*", cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -168,6 +169,24 @@ async function initDB() {
     console.log("Running in resilient mode with built-in datastore.");
   }
 }
+
+let dbPromise = null;
+async function ensureDB() {
+  if (!dbPromise) {
+    dbPromise = initDB();
+  }
+  return dbPromise;
+}
+
+// Middleware to ensure DB is initialized before requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDB();
+  } catch (err) {
+    console.warn("DB initialization warning:", err.message);
+  }
+  next();
+});
 
 // ============ JWT Routes ============
 app.post("/jwt", (req, res) => {
@@ -450,10 +469,15 @@ app.get("/", (req, res) => {
 
 // ============ Start Server ============
 async function start() {
-  await initDB();
+  await ensureDB();
   app.listen(port, () => {
     console.log(`BookNook server is running on port ${port}`);
   });
 }
 
-start();
+// Export app for Vercel Serverless Functions
+module.exports = app;
+
+if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
+  start();
+}
