@@ -62,8 +62,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800",
     description: "A classic novel exploring themes of wealth, love, ambition, and the American Dream during the Roaring Twenties.",
     totalCopies: 4,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-01")
   },
   {
@@ -74,8 +74,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=800",
     description: "An extraordinary journey through black holes, the big bang, general relativity, and the nature of our universe.",
     totalCopies: 3,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-05")
   },
   {
@@ -86,8 +86,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
     description: "How an insignificant ape became the ruler of planet Earth, capable of splitting the atom and journeying to the moon.",
     totalCopies: 5,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-10")
   },
   {
@@ -98,8 +98,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800",
     description: "A poetic tale about a young prince who visits various planets in space, addressing themes of loneliness, friendship, love, and loss.",
     totalCopies: 2,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-15")
   },
   {
@@ -110,8 +110,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800",
     description: "An easy and proven way to build good habits and break bad ones with actionable strategies for everyday transformation.",
     totalCopies: 6,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-20")
   },
   {
@@ -122,8 +122,8 @@ const initialBooks = [
     image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&q=80&w=800",
     description: "The unforgettable novel of a childhood in a sleepy Southern town and the crisis of conscience that rocked it.",
     totalCopies: 1,
-    userName: "Ruhi Reader",
-    userEmail: "ruhi@booknook.com",
+    userName: "BookNook Library",
+    userEmail: "library@booknook.com",
     createdAt: new Date("2026-10-25")
   }
 ];
@@ -189,7 +189,7 @@ app.use(async (req, res, next) => {
 });
 
 // ============ JWT Routes ============
-app.post(["/jwt", "/api/jwt"], (req, res) => {
+app.post("/jwt", (req, res) => {
   try {
     const { email } = req.body;
     const secret = process.env.JWT_SECRET || "booknook_jwt_secret_key_2024_very_secure";
@@ -208,7 +208,7 @@ app.post(["/jwt", "/api/jwt"], (req, res) => {
   }
 });
 
-app.post(["/jwt/logout", "/api/jwt/logout"], (req, res) => {
+app.post("/jwt/logout", (req, res) => {
   try {
     res
       .clearCookie("token", {
@@ -224,7 +224,7 @@ app.post(["/jwt/logout", "/api/jwt/logout"], (req, res) => {
 
 // ============ Book Routes ============
 // 1. GET /books — get all books (public)
-app.get(["/books", "/api/books"], async (req, res) => {
+app.get("/books", async (req, res) => {
   try {
     const { sort, order, limit, email, userEmail } = req.query;
 
@@ -268,7 +268,7 @@ app.get(["/books", "/api/books"], async (req, res) => {
 });
 
 // 2. GET /books/:id — get one book by ID
-app.get(["/books/:id", "/api/books/:id"], async (req, res) => {
+app.get("/books/:id", async (req, res) => {
   try {
     const id = req.params.id;
     if (isConnected && booksCollection) {
@@ -286,7 +286,7 @@ app.get(["/books/:id", "/api/books/:id"], async (req, res) => {
 });
 
 // 3. POST /books — add a new book (protected)
-app.post(["/books", "/api/books"], verifyToken, async (req, res) => {
+app.post("/books", verifyToken, async (req, res) => {
   try {
     const bookData = {
       ...req.body,
@@ -311,7 +311,7 @@ app.post(["/books", "/api/books"], verifyToken, async (req, res) => {
 });
 
 // 4. PATCH /books/:id — update a book (protected)
-app.patch(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
+app.patch("/books/:id", verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
     const updateData = req.body;
@@ -337,7 +337,7 @@ app.patch(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
 });
 
 // 5. DELETE /books/:id — delete a book (protected)
-app.delete(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
+app.delete("/books/:id", verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -360,7 +360,7 @@ app.delete(["/books/:id", "/api/books/:id"], verifyToken, async (req, res) => {
 
 // ============ Borrow Routes ============
 // 6. POST /borrows — borrow a book (protected)
-app.post(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
+app.post("/borrows", verifyToken, async (req, res) => {
   try {
     const { bookId, bookTitle, bookImage, userEmail } = req.body;
 
@@ -413,7 +413,7 @@ app.post(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
 });
 
 // 7. GET /borrows — get borrows of logged-in user (protected)
-app.get(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
+app.get("/borrows", verifyToken, async (req, res) => {
   try {
     const userEmail = req.query.userEmail || req.query.email || req.user?.email;
 
@@ -431,7 +431,7 @@ app.get(["/borrows", "/api/borrows"], verifyToken, async (req, res) => {
 });
 
 // 8. DELETE /borrows/:id — return a book (protected)
-app.delete(["/borrows/:id", "/api/borrows/:id"], verifyToken, async (req, res) => {
+app.delete("/borrows/:id", verifyToken, async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -459,17 +459,11 @@ app.delete(["/borrows/:id", "/api/borrows/:id"], verifyToken, async (req, res) =
 });
 
 // ============ Root Route ============
-app.get(["/", "/api"], (req, res) => {
+app.get("/", (req, res) => {
   res.json({
     message: "BookNook server is running!",
     status: "healthy",
     storage: isConnected ? "MongoDB Atlas" : "Resilient Active Datastore",
-    endpoints: {
-      books: "/books (or /api/books)",
-      bookById: "/books/:id (or /api/books/:id)",
-      borrows: "/borrows (or /api/borrows)",
-      jwt: "/jwt (or /api/jwt)",
-    },
   });
 });
 
